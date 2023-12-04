@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,95 +33,196 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: DrawingBoard(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class DrawingBoard extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _DrawingBoardState createState() => _DrawingBoardState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _DrawingBoardState extends State<DrawingBoard> {
+  Color selectedColor = Colors.black;
+  double strokeWidth = 5;
+  List<DrawingPoint?> drawingPoints = [];
+  List<Color> colors = [
+    const Color.fromRGBO(0, 0, 0, 1),
+    Color.fromARGB(255, 161, 101, 216),
+  ];
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  // Future<void> _saveDrawing() async {
+  //   ui.PictureRecorder recorder = ui.PictureRecorder();
+  //   final canvas = Canvas(recorder);
+  //   final size = context.size!;
+  //   final paint = _DrawingPainter(this.drawingPoints);
+
+  //   paint.paint(canvas, size);
+
+  //   final picture = recorder.endRecording();
+  //   final img = await picture.toImage(
+  //     size.width.toInt(),
+  //     size.height.toInt(),
+  //   );
+
+  //   final ByteData? byteData =
+  //       await img.toByteData(format: ui.ImageByteFormat.png);
+  //   final Uint8List? uint8List = byteData?.buffer.asUint8List();
+
+  //   // Guarda los bytes en un archivo (puedes ajustar la ubicación según tus necesidades)
+  //   final File file = File('ruta/de/destino/pintura.png');
+  //   await file.writeAsBytes(uint8List!);
+
+  //   print('Pintura guardada en: ${file.path}');
+  // }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: NetworkImage('https://picsum.photos/250?image=9'),
+                fit: BoxFit.fill)),
+        child: Stack(
+          children: [
+            GestureDetector(
+              onPanStart: (details) {
+                setState(() {
+                  drawingPoints.add(
+                    DrawingPoint(
+                      details.localPosition,
+                      Paint()
+                        ..color = selectedColor
+                        ..isAntiAlias = true
+                        ..strokeWidth = strokeWidth
+                        ..strokeCap = StrokeCap.round,
+                    ),
+                  );
+                });
+              },
+              onPanUpdate: (details) {
+                setState(() {
+                  drawingPoints.add(
+                    DrawingPoint(
+                      details.localPosition,
+                      Paint()
+                        ..color = selectedColor
+                        ..isAntiAlias = true
+                        ..strokeWidth = strokeWidth
+                        ..strokeCap = StrokeCap.round,
+                    ),
+                  );
+                });
+              },
+              onPanEnd: (details) {
+                setState(() {
+                  drawingPoints.add(null);
+                });
+              },
+              child: CustomPaint(
+                painter: _DrawingPainter(drawingPoints),
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  // decoration: BoxDecoration(
+                  //     image: DecorationImage(
+                  //         image:
+                  //             NetworkImage('https://picsum.photos/250?image=9'),
+                  //         fit: BoxFit.fitHeight)),
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Positioned(
+              top: 40,
+              right: 30,
+              child: Row(
+                children: [
+                  Slider(
+                    min: 0,
+                    max: 40,
+                    value: strokeWidth,
+                    onChanged: (val) => setState(() => strokeWidth = val),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => setState(() => drawingPoints = []),
+                    icon: Icon(Icons.clear),
+                    label: Text("Clear Board"),
+                  )
+                ],
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          color: Colors.grey[200],
+          padding: EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              colors.length,
+              (index) => _buildColorChose(colors[index]),
+            ),
+          ),
+        ),
+      ),
     );
   }
+
+  Widget _buildColorChose(Color color) {
+    bool isSelected = selectedColor == color;
+    return GestureDetector(
+      onTap: () => setState(() => selectedColor = color),
+      child: Container(
+        height: isSelected ? 47 : 40,
+        width: isSelected ? 47 : 40,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+        ),
+      ),
+    );
+  }
+}
+
+class _DrawingPainter extends CustomPainter {
+  final List<DrawingPoint?> drawingPoints;
+
+  _DrawingPainter(this.drawingPoints);
+
+  List<Offset> offsetsList = [];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    try {
+      for (int i = 0; i < drawingPoints.length - 1; i++) {
+        if (drawingPoints[i] != null && drawingPoints[i + 1] != null) {
+          canvas.drawLine(drawingPoints[i]!.offset,
+              drawingPoints[i + 1]!.offset, drawingPoints[i]!.paint);
+        } else if (drawingPoints[i + 1] == null) {
+          offsetsList.clear();
+          offsetsList.add(drawingPoints[i]!.offset);
+
+          canvas.drawPoints(
+              PointMode.points, offsetsList, drawingPoints[i]!.paint);
+        }
+      }
+    } catch (e) {
+      print('El error es: $e');
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class DrawingPoint {
+  Offset offset;
+  Paint paint;
+
+  DrawingPoint(this.offset, this.paint);
 }
