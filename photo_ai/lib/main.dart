@@ -1,10 +1,19 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_ai/config/theme/theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  //usePathUrlStrategy();
+  await Supabase.initialize(
+    url: '',
+    anonKey: '',
+  );
+  runApp(const ProviderScope(child: MyApp()));
 }
+
+// Get a reference your Supabase client
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,216 +22,166 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: DrawingBoard(),
+      title: 'Photo AI',
+      theme: AppTheme().getTheme(),
+      home: PhotoScreen(),
     );
   }
 }
 
-class DrawingBoard extends StatefulWidget {
+class PhotoScreen extends ConsumerWidget {
+  const PhotoScreen({super.key});
+
   @override
-  _DrawingBoardState createState() => _DrawingBoardState();
+  Widget build(BuildContext context, ref) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text('PhotoAI'),
+        ),
+        body: LayoutBuilder(builder: (context, constraints) {
+          if (constraints.maxWidth > 600) {
+            return WideLayout();
+          } else {
+            return NarrowLayout();
+          }
+        }));
+  }
 }
 
-class _DrawingBoardState extends State<DrawingBoard> {
-  Color selectedColor = Colors.black;
-  double strokeWidth = 5;
-  List<DrawingPoint?> drawingPoints = [];
-  List<Color> colors = [
-    const Color.fromRGBO(0, 0, 0, 1),
-    Color.fromARGB(255, 161, 101, 216),
+class WideLayout extends ConsumerStatefulWidget {
+  @override
+  WideLayoutState createState() => WideLayoutState();
+}
+
+class WideLayoutState extends ConsumerState<WideLayout>
+    with SingleTickerProviderStateMixin {
+  String selectedChip = '';
+
+  final List<String> elements = [
+    'Texto to Image',
+    'Image to image',
+    'Inpainting'
   ];
+  String selectedElement = '';
 
-  // Future<void> _saveDrawing() async {
-  //   ui.PictureRecorder recorder = ui.PictureRecorder();
-  //   final canvas = Canvas(recorder);
-  //   final size = context.size!;
-  //   final paint = _DrawingPainter(this.drawingPoints);
+  late TabController tabController;
 
-  //   paint.paint(canvas, size);
+  // const WideLayout({
+  //   super.key, this.s
+  // });
 
-  //   final picture = recorder.endRecording();
-  //   final img = await picture.toImage(
-  //     size.width.toInt(),
-  //     size.height.toInt(),
-  //   );
-
-  //   final ByteData? byteData =
-  //       await img.toByteData(format: ui.ImageByteFormat.png);
-  //   final Uint8List? uint8List = byteData?.buffer.asUint8List();
-
-  //   // Guarda los bytes en un archivo (puedes ajustar la ubicación según tus necesidades)
-  //   final File file = File('ruta/de/destino/pintura.png');
-  //   await file.writeAsBytes(uint8List!);
-
-  //   print('Pintura guardada en: ${file.path}');
-  // }
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: elements.length, vsync: this);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-            image: DecorationImage(
-                image: NetworkImage('https://picsum.photos/250?image=9'),
-                fit: BoxFit.fill)),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onPanStart: (details) {
-                setState(() {
-                  drawingPoints.add(
-                    DrawingPoint(
-                      details.localPosition,
-                      Paint()
-                        ..color = selectedColor
-                        ..isAntiAlias = true
-                        ..strokeWidth = strokeWidth
-                        ..strokeCap = StrokeCap.round,
-                    ),
-                  );
-                });
-              },
-              onPanUpdate: (details) {
-                setState(() {
-                  drawingPoints.add(
-                    DrawingPoint(
-                      details.localPosition,
-                      Paint()
-                        ..color = selectedColor
-                        ..isAntiAlias = true
-                        ..strokeWidth = strokeWidth
-                        ..strokeCap = StrokeCap.round,
-                    ),
-                  );
-                });
-              },
-              onPanEnd: (details) {
-                setState(() {
-                  drawingPoints.add(null);
-                });
-              },
-              child: CustomPaint(
-                painter: _DrawingPainter(drawingPoints),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  // decoration: BoxDecoration(
-                  //     image: DecorationImage(
-                  //         image:
-                  //             NetworkImage('https://picsum.photos/250?image=9'),
-                  //         fit: BoxFit.fitHeight)),
-                ),
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Scrollbar(
+              child: Column(
+                children: [Expanded(child: SettingsForm())],
               ),
-            ),
-            Positioned(
-              top: 40,
-              right: 30,
-              child: Row(
-                children: [
-                  Slider(
-                    min: 0,
-                    max: 40,
-                    value: strokeWidth,
-                    onChanged: (val) => setState(() => strokeWidth = val),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => setState(() => drawingPoints = []),
-                    icon: Icon(Icons.clear),
-                    label: Text("Clear Board"),
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          color: Colors.grey[200],
-          padding: EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(
-              colors.length,
-              (index) => _buildColorChose(colors[index]),
             ),
           ),
         ),
-      ),
+        Expanded(
+          flex: 3,
+          child: Column(
+            children: [
+              TabBar(controller: tabController, tabs: [
+                for (final element in elements)
+                  Tab(
+                    text: element,
+                  ),
+              ]),
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    Text('1'),
+                    Text('2'),
+                    Text('3'),
+                  ],
+                ),
+              )
+            ],
+          ),
+        )
+      ],
     );
   }
+}
 
-  Widget _buildColorChose(Color color) {
-    bool isSelected = selectedColor == color;
-    return GestureDetector(
-      onTap: () => setState(() => selectedColor = color),
-      child: Container(
-        height: isSelected ? 47 : 40,
-        width: isSelected ? 47 : 40,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+class SettingsForm extends StatelessWidget {
+  final TextEditingController promptController = TextEditingController();
+  final TextEditingController negativePromptController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Instrucciones',
+          style: TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        SizedBox(height: 8.0),
+        TextField(
+          controller: promptController,
+          maxLines: null, // Permite múltiples líneas
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            labelText: 'Prompt',
+            hintText: 'Ingrese su prompt aquí...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        SizedBox(height: 16.0),
+        TextField(
+          controller: negativePromptController,
+          maxLines: null, // Permite múltiples líneas
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            labelText: 'Negative Prompt',
+            hintText: 'Ingrese su negative prompt aquí...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        SizedBox(height: 16.0),
+        ElevatedButton(
+          onPressed: () {
+            // Acción a realizar al presionar el botón (puedes guardar los valores, validar, etc.)
+            print('Prompt: ${promptController.text}');
+            print('Negative Prompt: ${negativePromptController.text}');
+          },
+          child: Text(
+            'Enviar',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _DrawingPainter extends CustomPainter {
-  final List<DrawingPoint?> drawingPoints;
-
-  _DrawingPainter(this.drawingPoints);
-
-  List<Offset> offsetsList = [];
+class NarrowLayout extends ConsumerWidget {
+  const NarrowLayout({
+    super.key,
+  });
 
   @override
-  void paint(Canvas canvas, Size size) {
-    try {
-      for (int i = 0; i < drawingPoints.length - 1; i++) {
-        if (drawingPoints[i] != null && drawingPoints[i + 1] != null) {
-          canvas.drawLine(drawingPoints[i]!.offset,
-              drawingPoints[i + 1]!.offset, drawingPoints[i]!.paint);
-        } else if (drawingPoints[i + 1] == null) {
-          offsetsList.clear();
-          offsetsList.add(drawingPoints[i]!.offset);
-
-          canvas.drawPoints(
-              PointMode.points, offsetsList, drawingPoints[i]!.paint);
-        }
-      }
-    } catch (e) {
-      print('El error es: $e');
-    }
+  Widget build(BuildContext context, ref) {
+    return Center();
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class DrawingPoint {
-  Offset offset;
-  Paint paint;
-
-  DrawingPoint(this.offset, this.paint);
 }

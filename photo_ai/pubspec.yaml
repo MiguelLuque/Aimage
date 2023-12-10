@@ -31,11 +31,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-
+  flutter_riverpod: ^2.3.6
+  # riverpod_annotation is for generating code for Riverpod
+  riverpod_annotation: ^2.1.1
+  # supabase_flutter is for connecting to Supabase
+  supabase_flutter: ^1.10.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,7 +55,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
