@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_ai/config/theme/theme.dart';
+import 'package:photo_ai/features/common/layouts/narrow_layout.dart';
+import 'package:photo_ai/features/common/layouts/wide_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   //usePathUrlStrategy();
   await Supabase.initialize(
-    url: '',
-    anonKey: '',
+    url: 'https://qreyzlrsuyxlzinmskbb.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyZXl6bHJzdXl4bHppbm1za2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDI0MDk1MzIsImV4cCI6MjAxNzk4NTUzMn0.YMPoEOk0iNE3KK6GAlRdoocbGWkKVh42986HYIx4u2k',
   );
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -24,20 +28,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Photo AI',
       theme: AppTheme().getTheme(),
-      home: PhotoScreen(),
+      home: HomeScreen(),
     );
   }
 }
 
-class PhotoScreen extends ConsumerWidget {
-  const PhotoScreen({super.key});
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text('PhotoAI'),
+          title: const Text('PhotoAI'),
         ),
         body: LayoutBuilder(builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
@@ -46,142 +50,5 @@ class PhotoScreen extends ConsumerWidget {
             return NarrowLayout();
           }
         }));
-  }
-}
-
-class WideLayout extends ConsumerStatefulWidget {
-  @override
-  WideLayoutState createState() => WideLayoutState();
-}
-
-class WideLayoutState extends ConsumerState<WideLayout>
-    with SingleTickerProviderStateMixin {
-  String selectedChip = '';
-
-  final List<String> elements = [
-    'Texto to Image',
-    'Image to image',
-    'Inpainting'
-  ];
-  String selectedElement = '';
-
-  late TabController tabController;
-
-  // const WideLayout({
-  //   super.key, this.s
-  // });
-
-  @override
-  void initState() {
-    super.initState();
-    tabController = TabController(length: elements.length, vsync: this);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Scrollbar(
-              child: Column(
-                children: [Expanded(child: SettingsForm())],
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              TabBar(controller: tabController, tabs: [
-                for (final element in elements)
-                  Tab(
-                    text: element,
-                  ),
-              ]),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    Text('1'),
-                    Text('2'),
-                    Text('3'),
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
-      ],
-    );
-  }
-}
-
-class SettingsForm extends StatelessWidget {
-  final TextEditingController promptController = TextEditingController();
-  final TextEditingController negativePromptController =
-      TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Instrucciones',
-          style: TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8.0),
-        TextField(
-          controller: promptController,
-          maxLines: null, // Permite múltiples líneas
-          keyboardType: TextInputType.multiline,
-          decoration: InputDecoration(
-            labelText: 'Prompt',
-            hintText: 'Ingrese su prompt aquí...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        SizedBox(height: 16.0),
-        TextField(
-          controller: negativePromptController,
-          maxLines: null, // Permite múltiples líneas
-          keyboardType: TextInputType.multiline,
-          decoration: InputDecoration(
-            labelText: 'Negative Prompt',
-            hintText: 'Ingrese su negative prompt aquí...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        SizedBox(height: 16.0),
-        ElevatedButton(
-          onPressed: () {
-            // Acción a realizar al presionar el botón (puedes guardar los valores, validar, etc.)
-            print('Prompt: ${promptController.text}');
-            print('Negative Prompt: ${negativePromptController.text}');
-          },
-          child: Text(
-            'Enviar',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class NarrowLayout extends ConsumerWidget {
-  const NarrowLayout({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context, ref) {
-    return Center();
   }
 }

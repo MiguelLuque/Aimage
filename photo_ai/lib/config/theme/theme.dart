@@ -7,7 +7,7 @@ class AppTheme {
         //primaryColor: Color.fromRGBO(178, 223, 219, 1),
         brightness: Brightness.dark,
         primaryColor: Colors.black,
-        textTheme: TextTheme(labelLarge: TextStyle(color: Colors.white)),
+        textTheme: const TextTheme(labelLarge: TextStyle(color: Colors.white)),
         appBarTheme: const AppBarTheme(centerTitle: false),
       );
 
