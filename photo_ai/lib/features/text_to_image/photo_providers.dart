@@ -85,7 +85,24 @@ class SpinnerNotifier extends StateNotifier<bool> {
   SpinnerNotifier() : super(false);
 
   void updateValue(bool value) {
-    print("value updated");
+    state = value;
+  }
+
+  void reset() {
+    state = false;
+  }
+}
+
+//Control app settings and preferences
+final appSettingsNotifierProvider =
+    StateNotifierProvider<AppSettingsNotifier, bool>(
+  (ref) => AppSettingsNotifier(),
+);
+
+class AppSettingsNotifier extends StateNotifier<bool> {
+  AppSettingsNotifier() : super(false);
+
+  void updateValue(bool value) {
     state = value;
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_ai/features/common/domain/inpainting_state.dart';
 import 'package:photo_ai/features/inpainting/application/utils/inpainting_utils.dart';
 import 'package:photo_ai/features/inpainting/domain/entities/drawing_point.dart';
-import 'package:photo_ai/features/inpainting/presentation/screens/emptyInpainting_screen.dart';
+import 'package:photo_ai/features/common/screens/empty_editing_screen.dart';
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
 
 import '../../domain/entities/drawing_painter.dart';
@@ -34,7 +34,7 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
     imageUrlSelected = ref.watch(selectedImageNotifierProvider);
 
     return imageUrlSelected == null
-        ? EmptyInpaintingScreen()
+        ? EmptyEditingScreen()
         : FutureBuilder<Size>(
             future: calculateImageDimension(imageUrlSelected),
             builder: (context, snapshot) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_ai/features/common/widgets/loading_widget.dart';
+import 'package:photo_ai/features/image_to_image/presentation/screens/image_to_image_screen.dart';
 import 'package:photo_ai/features/inpainting/presentation/screens/inpainting_screen.dart';
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
 import 'package:photo_ai/features/text_to_image/presentation/screens/text_to_image_screen.dart';
@@ -35,7 +37,6 @@ class WideLayoutState extends ConsumerState<WideLayout>
   @override
   Widget build(BuildContext context) {
     bool isLoading = ref.watch(spinnerNotifierProvider);
-    print("is loading watched as : $isLoading");
     return Row(
       children: [
         const ImageSettingsForm(),
@@ -58,15 +59,12 @@ class WideLayoutState extends ConsumerState<WideLayout>
                 child: TabBarView(
                   controller: tabController,
                   children: [
-                    isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : ImageListScreen(),
-                    isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : Text('2'),
-                    isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : InpaintingScreen(),
+                    LoadingWidget(
+                        isLoading: isLoading, child: const ImageListScreen()),
+                    LoadingWidget(
+                        isLoading: isLoading, child: const ImageToImageScreen()),
+                    LoadingWidget(
+                        isLoading: isLoading, child: const InpaintingScreen()),
                   ],
                 ),
               )

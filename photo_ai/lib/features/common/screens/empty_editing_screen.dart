@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:photo_ai/features/common/screens/emptyImage_screen.dart';
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
 
-class EmptyInpaintingScreen extends ConsumerStatefulWidget {
-  const EmptyInpaintingScreen({super.key});
+class EmptyEditingScreen extends ConsumerStatefulWidget {
+  const EmptyEditingScreen({super.key});
 
   @override
-  ConsumerState<EmptyInpaintingScreen> createState() =>
-      _EmptyInpaintingScreenState();
+  ConsumerState<EmptyEditingScreen> createState() => _EmptyEditingScreenState();
 }
 
-class _EmptyInpaintingScreenState extends ConsumerState<EmptyInpaintingScreen> {
+class _EmptyEditingScreenState extends ConsumerState<EmptyEditingScreen> {
   int? selectedImage;
 
   @override
@@ -19,34 +19,44 @@ class _EmptyInpaintingScreenState extends ConsumerState<EmptyInpaintingScreen> {
     List<String> imageUrls = [];
 
     imageUrls.addAll(ref.watch(textToImageNotifierProvider));
-    imageUrls.addAll(ref.watch(imageToImageNotifierProvider));
-    imageUrls
-        .addAll(ref.watch(inpaintingImageNotifierProvider).generatedImages!);
+    bool showAllImages = ref.watch(appSettingsNotifierProvider);
+
+    if (showAllImages) {
+      imageUrls.addAll(ref.watch(imageToImageNotifierProvider));
+      imageUrls
+          .addAll(ref.watch(inpaintingImageNotifierProvider).generatedImages!);
+    }
 
     return imageUrls.isEmpty
-        ? const Center(
-            child: MaterialButton(
-            splashColor: Color.fromARGB(0, 30, 24, 24),
-            highlightColor: Colors.transparent,
-            enableFeedback: false,
-            onPressed: null,
-            child: Text(
-              "No images yet. Start creating now!",
-              style: TextStyle(fontSize: 20),
-            ),
-          ))
+        ? const EmptyImageScreen()
         : SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text("Show all creations"),
+                    Switch(
+                      // This bool value toggles the switch.
+                      value: showAllImages,
+                      onChanged: (bool value) {
+                        // This is called when the user toggles the switch.
+                        ref
+                            .watch(appSettingsNotifierProvider.notifier)
+                            .updateValue(value);
+                      },
+                    ),
+                  ],
+                ),
                 const SizedBox(
                   height: 20,
                 ),
-                Wrap(
+                Center(
+                    child: Wrap(
                   spacing: 15.0, // Espaciado entre los widgets
                   runSpacing: 15.0, // Espaciado entre las filas de widgets
                   children: _createCardsFromList(imageUrls, context),
-                )
+                )),
               ],
             ),
           );

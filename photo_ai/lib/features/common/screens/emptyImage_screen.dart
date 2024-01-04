@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class EmptyTextToImageScreen extends StatelessWidget {
-  const EmptyTextToImageScreen({super.key});
+class EmptyImageScreen extends StatelessWidget {
+  const EmptyImageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
