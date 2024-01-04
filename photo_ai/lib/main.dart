@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Photo AI',
       theme: AppTheme().getTheme(),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
@@ -45,9 +45,9 @@ class HomeScreen extends ConsumerWidget {
         ),
         body: LayoutBuilder(builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
-            return WideLayout();
+            return const WideLayout();
           } else {
-            return NarrowLayout();
+            return const NarrowLayout();
           }
         }));
   }

@@ -1,9 +1,18 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_ai/features/common/domain/inpainting_state.dart';
 import 'package:photo_ai/features/common/utils/error_utils.dart';
+import 'package:photo_ai/features/inpainting/domain/entities/drawing_point.dart';
+import 'package:photo_ai/features/inpainting/domain/entities/inpainting_request.dart';
+import 'package:photo_ai/features/inpainting/domain/entities/mask_painter.dart';
+import 'package:photo_ai/features/inpainting/infraestructure/inpainting_service.dart';
 import 'package:photo_ai/features/text_to_image/domain/entities/text_to_image_request.dart';
 import 'package:photo_ai/features/text_to_image/infraestructure/text_to_image_service.dart';
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
+import 'package:photo_ai/main.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageSettingsForm extends StatelessWidget {
   const ImageSettingsForm({
@@ -38,10 +47,11 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
       TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  var _isButtonDisabled = false;
+  var strength = 0.7;
 
   TextToImageRequest request = TextToImageRequest();
   TextToImageServiceImpl textToImageService = TextToImageServiceImpl();
+  InpaintingServiceImpl inpaintingServiceImpl = InpaintingServiceImpl();
 
   @override
   void initState() {
@@ -50,7 +60,8 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(featureNotifierProvider);
+    var tab = ref.watch(featureNotifierProvider);
+    bool isLoading = ref.watch(spinnerNotifierProvider);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
@@ -112,7 +123,6 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                         max: 4,
                         min: 1,
                         divisions: 3,
-                        label: request.samples,
                         onChanged: (double value) {
                           setState(() {
                             request.samples = value.toString();
@@ -132,7 +142,6 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                         max: 50,
                         min: 5,
                         divisions: 9,
-                        label: request.numInferenceSteps,
                         onChanged: (double value) {
                           setState(() {
                             request.numInferenceSteps = value.toString();
@@ -145,13 +154,37 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                           style: TextStyle(fontSize: 12),
                         ),
                       ),
+                      if (tab == 2)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 16.0),
+                            Text('Strength'),
+                            Slider(
+                              value: strength,
+                              max: 1,
+                              min: 0,
+                              divisions: 10,
+                              onChanged: (double value) {
+                                setState(() {
+                                  strength = value;
+                                });
+                              },
+                            ),
+                            Center(
+                              child: Text(
+                                '$strength',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
                       SizedBox(height: 16.0),
                       Text('Guidiance Scale'),
                       Slider(
                         value: request.guidanceScale,
                         max: 30,
                         min: 1,
-                        label: request.guidanceScale.toString(),
                         onChanged: (double value) {
                           setState(() {
                             request.guidanceScale =
@@ -172,7 +205,6 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                             ? 0.0
                             : request.seed!.toDouble(),
                         max: 99999,
-                        label: request.numInferenceSteps,
                         onChanged: (double value) {
                           setState(() {
                             if (value == 0.0) {
@@ -200,35 +232,17 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 14),
             child: ElevatedButton(
-              onPressed: _isButtonDisabled
+              onPressed: isLoading
                   ? null
                   : () {
-                      setState(() {
-                        _isButtonDisabled = true; // Desactiva el botón
-                      });
                       if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            showSnackBarCustomMessage(context, "Processing"));
-
                         request.prompt = promptController.text;
                         request.negativePrompt += promptController.text;
 
-                        textToImageService.textToImage(request).then((value) {
-                          ref
-                              .read(textToImageNotifierProvider.notifier)
-                              .updateValue(value);
-                          if (value.isEmpty) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(showSnackBarError(context));
-                          }
-                        });
-                        handleResponse(context, ref);
+                        generateImage(context, ref, tab);
                       }
-                      setState(() {
-                        _isButtonDisabled = false; // Vuelve a activar el botón
-                      });
                     },
-              child: Text('Generate'),
+              child: const Text('Generate'),
             ),
           ),
         ],
@@ -236,17 +250,127 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
     );
   }
 
-  void handleResponse(BuildContext context, WidgetRef ref) {
-    switch (4) {
-      case 1:
+  void generateImage(BuildContext context, WidgetRef ref, int tab) {
+    switch (tab) {
+      case 0:
         //text to image
+        ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+        textToImageService
+            .textToImage(request)
+            .then((value) {
+              ref.read(textToImageNotifierProvider.notifier).updateValue(value);
+              if (value.isEmpty) {
+                showGenericError(context);
+              }
+            })
+            .catchError((onError) => showErrorCustom(context, "Error cr"))
+            .whenComplete(() =>
+                ref.read(spinnerNotifierProvider.notifier).updateValue(false));
+
+        break;
+      case 1:
+//TODO
         break;
       case 2:
-        //image to image
-        break;
-      case 3:
         //inpaint image
+        var settings = ref.read(inpaintingImageNotifierProvider);
+        var selectedUrl = ref.read(selectedImageNotifierProvider);
+
+        if (selectedUrl == null) {
+          showErrorCustom(context, "Select and draw a mask");
+          break;
+        }
+
+        if (settings.drawingPoints != null &&
+            settings.drawingPoints!.isNotEmpty) {
+          ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+
+          ref.read(selectedImageNotifierProvider.notifier).resetAll();
+
+          _saveDrawing(settings).then((maskUrl) {
+            InpaintingRequest inpaintRequest = InpaintingRequest(
+                initImage: selectedUrl,
+                maskImage: maskUrl,
+                prompt: request.prompt,
+                negativePrompt: request.negativePrompt,
+                samples: request.samples,
+                steps: request.numInferenceSteps,
+                strength: strength,
+                guidanceScale: request.guidanceScale,
+                width: settings.width.toString(),
+                height: settings.height.toString(),
+                seed: request.seed);
+            inpaintingServiceImpl.inpaint(inpaintRequest).then((value) {
+              ref
+                  .read(inpaintingImageNotifierProvider.notifier)
+                  .updateValue(InpaintingState(generatedImages: value));
+
+              if (value.isEmpty) {
+                showGenericError(context);
+              }
+            });
+          }).catchError((error) {
+            showErrorCustom(context, error.message);
+          }).whenComplete(() =>
+              ref.read(spinnerNotifierProvider.notifier).updateValue(false));
+        } else {
+          showErrorCustom(context, "It is necessary to draw a mask");
+        }
+
         break;
+    }
+  }
+
+  List<DrawingPoint> _scalePoints(
+      List<DrawingPoint> points, double scaleFactor, bool keepPainted) {
+    return points.map((point) {
+      var res = DrawingPoint.copy(point);
+      res.offset = res.offset.scale(scaleFactor, scaleFactor);
+      if (keepPainted) {
+        res.paint.color = Colors.white;
+      } else {
+        res.paint.color = Colors.black;
+      }
+      return res;
+    }).toList();
+  }
+
+  Future<String> _saveDrawing(InpaintingState settings) async {
+    try {
+      ui.PictureRecorder recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final Size size = Size(settings.width!, settings.height!);
+      List<DrawingPoint> points = _scalePoints(List.of(settings.drawingPoints!),
+          settings.height! / settings.constraints!.maxHeight, true);
+
+      final paint = MaskPainter(points, true);
+      paint.paint(canvas, size);
+
+      final picture = recorder.endRecording();
+      final mask = await picture.toImage(
+        size.width.toInt(),
+        size.height.toInt(),
+      );
+
+      final byteData = await mask.toByteData(format: ui.ImageByteFormat.png);
+      final uint8List = byteData?.buffer.asUint8List();
+
+      await supabase.storage.from('mask').uploadBinary(
+            'public/userid.png',
+            uint8List!,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+          );
+
+      final String url =
+          await supabase.storage.from('mask').getPublicUrl('public/userid.png');
+
+      return url;
+
+      // setState(() {
+      //   drawingPoints.clear();
+      // });
+    } catch (e) {
+      throw Exception("Error processing the mask");
     }
   }
 }

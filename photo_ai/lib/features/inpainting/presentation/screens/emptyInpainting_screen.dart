@@ -4,9 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
 
 class EmptyInpaintingScreen extends ConsumerStatefulWidget {
-  final List<String> imageUrls;
-
-  const EmptyInpaintingScreen({super.key, required this.imageUrls});
+  const EmptyInpaintingScreen({super.key});
 
   @override
   ConsumerState<EmptyInpaintingScreen> createState() =>
@@ -18,10 +16,17 @@ class _EmptyInpaintingScreenState extends ConsumerState<EmptyInpaintingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.imageUrls.isEmpty
+    List<String> imageUrls = [];
+
+    imageUrls.addAll(ref.watch(textToImageNotifierProvider));
+    imageUrls.addAll(ref.watch(imageToImageNotifierProvider));
+    imageUrls
+        .addAll(ref.watch(inpaintingImageNotifierProvider).generatedImages!);
+
+    return imageUrls.isEmpty
         ? const Center(
             child: MaterialButton(
-            splashColor: Colors.transparent,
+            splashColor: Color.fromARGB(0, 30, 24, 24),
             highlightColor: Colors.transparent,
             enableFeedback: false,
             onPressed: null,
@@ -40,7 +45,7 @@ class _EmptyInpaintingScreenState extends ConsumerState<EmptyInpaintingScreen> {
                 Wrap(
                   spacing: 15.0, // Espaciado entre los widgets
                   runSpacing: 15.0, // Espaciado entre las filas de widgets
-                  children: _createCardsFromList(widget.imageUrls, context),
+                  children: _createCardsFromList(imageUrls, context),
                 )
               ],
             ),
@@ -123,9 +128,9 @@ class _EmptyInpaintingScreenState extends ConsumerState<EmptyInpaintingScreen> {
           onPressed: selectedImage == null
               ? null
               : () => ref
-                  .read(inpaintingSelectedImageNotifierProvider.notifier)
-                  .updateValue(urls[selectedImage!]),
-          child: Text("Set photo")),
+                  .read(selectedImageNotifierProvider.notifier)
+                  .updateSelectedImage(urls[selectedImage!]),
+          child: const Text("Set photo")),
     ));
     return widgets;
   }

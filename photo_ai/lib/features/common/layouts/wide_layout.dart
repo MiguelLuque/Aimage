@@ -34,6 +34,8 @@ class WideLayoutState extends ConsumerState<WideLayout>
 
   @override
   Widget build(BuildContext context) {
+    bool isLoading = ref.watch(spinnerNotifierProvider);
+    print("is loading watched as : $isLoading");
     return Row(
       children: [
         const ImageSettingsForm(),
@@ -56,9 +58,15 @@ class WideLayoutState extends ConsumerState<WideLayout>
                 child: TabBarView(
                   controller: tabController,
                   children: [
-                    ImageListScreen(),
-                    Text('2'),
-                    InpaintingScreen(),
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : ImageListScreen(),
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : Text('2'),
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : InpaintingScreen(),
                   ],
                 ),
               )

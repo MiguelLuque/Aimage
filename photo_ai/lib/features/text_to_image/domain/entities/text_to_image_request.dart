@@ -39,7 +39,7 @@ class TextToImageRequest {
       this.enhancePrompt = "no",
       this.scheduler = "DPMSolverMultistepScheduler",
       this.seed,
-      this.guidanceScale = 7.0,
+      this.guidanceScale = 6.0,
       this.webhook,
       this.trackId,
       this.tomesd = "yes",

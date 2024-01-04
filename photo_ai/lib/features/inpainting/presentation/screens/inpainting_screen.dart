@@ -1,19 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_ai/features/common/domain/inpainting_state.dart';
 import 'package:photo_ai/features/inpainting/application/utils/inpainting_utils.dart';
 import 'package:photo_ai/features/inpainting/domain/entities/drawing_point.dart';
-import 'package:photo_ai/features/inpainting/domain/entities/mask_painter.dart';
-import 'package:photo_ai/features/inpainting/infraestructure/inpainting_service.dart';
 import 'package:photo_ai/features/inpainting/presentation/screens/emptyInpainting_screen.dart';
 import 'package:photo_ai/features/text_to_image/photo_providers.dart';
-import 'dart:ui' as ui;
-import 'dart:ui';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../../../main.dart';
 import '../../domain/entities/drawing_painter.dart';
 
 class InpaintingScreen extends ConsumerStatefulWidget {
@@ -28,7 +20,6 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
   double strokeWidth = 20;
   List<DrawingPoint> drawingPoints = [];
   String? imageUrlSelected;
-  bool isLoading = false;
 
   BoxConstraints? imageConstranints;
   List<Color> colors = [
@@ -36,152 +27,132 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
     Colors.white,
   ];
 
-  bool usePaint = true;
+  bool keepPainted = false;
 
   @override
   Widget build(BuildContext context) {
-    List<String> imageUrls = ref.watch(textToImageNotifierProvider);
-    imageUrlSelected = ref.watch(inpaintingSelectedImageNotifierProvider);
-    imageUrls = List.of([
-      "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/1-2110e71a-8575-4e7e-9626-99c2ad632109.png",
-      "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/1-2110e71a-8575-4e7e-9626-99c2ad632109.png",
-      "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/1-2110e71a-8575-4e7e-9626-99c2ad632109.png",
-      "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/1-2110e71a-8575-4e7e-9626-99c2ad632109.png"
-    ]);
+    imageUrlSelected = ref.watch(selectedImageNotifierProvider);
 
-    return isLoading
-        ? Center(child: CircularProgressIndicator())
-        : imageUrlSelected == null
-            ? EmptyInpaintingScreen(imageUrls: imageUrls)
-            : FutureBuilder<Size>(
-                future: calculateImageDimension(imageUrlSelected),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: _buildEditionTools(snapshot.data!.height,
-                                snapshot.data!.width, imageConstranints),
-                          ),
-                          SizedBox(height: 15),
-                          Expanded(
-                            child: AspectRatio(
-                              aspectRatio:
-                                  snapshot.data!.width / snapshot.data!.height,
-                              child: LayoutBuilder(
-                                  builder: (context, boxConstraints) {
-                                // if (imageConstranints != null &&
-                                //     drawingPoints.isNotEmpty) {
-                                //   drawingPoints = _scalePoints(
-                                //       List.of(drawingPoints),
-                                //       imageConstranints!.maxHeight /
-                                //           boxConstraints.maxHeight,
-                                //       false);
-                                // }
-
-                                _onConstraintsChanged(boxConstraints);
-
-                                return GestureDetector(
-                                  onPanStart: (details) {
-                                    if (isPointWithinImage(
-                                        details.localPosition,
-                                        boxConstraints)) {
-                                      setState(() {
-                                        drawingPoints.add(
-                                          DrawingPoint(
-                                            details.localPosition,
-                                            Paint()
-                                              ..color = selectedColor
-                                              ..isAntiAlias = true
-                                              ..strokeWidth = strokeWidth
-                                              ..strokeCap = StrokeCap.round,
-                                          ),
-                                        );
-                                      });
-                                    }
-                                  },
-                                  onPanUpdate: (details) {
-                                    setState(() {
-                                      if (isPointWithinImage(
-                                          details.localPosition,
-                                          boxConstraints)) {
-                                        drawingPoints.add(
-                                          DrawingPoint(
-                                            details.localPosition,
-                                            Paint()
-                                              ..color = selectedColor
-                                              ..isAntiAlias = true
-                                              ..strokeWidth = strokeWidth
-                                              ..strokeCap = StrokeCap.round,
-                                          ),
-                                        );
-                                      }
-                                    });
-                                  },
-                                  onPanEnd: (details) {
-                                    setState(() {
-                                      drawingPoints.add(DrawingPoint(
-                                          Offset(0, 0), Paint(), true));
-                                    });
-                                  },
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: NetworkImage(
-                                                  imageUrlSelected!),
-                                              fit: BoxFit.contain)),
-                                      child: CustomPaint(
-                                        painter: DrawingPainter(drawingPoints),
-                                        child: SizedBox(
-                                          height: MediaQuery.of(context)
-                                              .size
-                                              .height,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                        ),
-                                      )),
-                                );
-                              }),
-                            ),
-                          ),
-                        ],
+    return imageUrlSelected == null
+        ? EmptyInpaintingScreen()
+        : FutureBuilder<Size>(
+            future: calculateImageDimension(imageUrlSelected),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: _buildEditionTools(snapshot.data!.height,
+                            snapshot.data!.width, imageConstranints),
                       ),
-                    );
-                  } else {
-                    return const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(child: Text('Loading...')),
-                        CircularProgressIndicator()
-                      ],
-                    );
-                  }
-                });
+                      SizedBox(height: 15),
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio:
+                              snapshot.data!.width / snapshot.data!.height,
+                          child:
+                              LayoutBuilder(builder: (context, boxConstraints) {
+                            // if (imageConstranints != null &&
+                            //     drawingPoints.isNotEmpty) {
+                            //   drawingPoints = _scalePoints(
+                            //       List.of(drawingPoints),
+                            //       imageConstranints!.maxHeight /
+                            //           boxConstraints.maxHeight,
+                            //       false);
+                            // }
+
+                            _onConstraintsChanged(boxConstraints);
+
+                            return GestureDetector(
+                              onPanStart: (details) {
+                                if (isPointWithinImage(
+                                    details.localPosition, boxConstraints)) {
+                                  setState(() {
+                                    drawingPoints.add(
+                                      DrawingPoint(
+                                        details.localPosition,
+                                        Paint()
+                                          ..color = selectedColor
+                                          ..isAntiAlias = true
+                                          ..strokeWidth = strokeWidth
+                                          ..strokeCap = StrokeCap.round,
+                                      ),
+                                    );
+                                  });
+                                }
+                              },
+                              onPanUpdate: (details) {
+                                setState(() {
+                                  if (isPointWithinImage(
+                                      details.localPosition, boxConstraints)) {
+                                    drawingPoints.add(
+                                      DrawingPoint(
+                                        details.localPosition,
+                                        Paint()
+                                          ..color = selectedColor
+                                          ..isAntiAlias = true
+                                          ..strokeWidth = strokeWidth
+                                          ..strokeCap = StrokeCap.round,
+                                      ),
+                                    );
+                                  }
+                                });
+                              },
+                              onPanEnd: (details) {
+                                setState(() {
+                                  drawingPoints.add(DrawingPoint(
+                                      Offset(0, 0), Paint(), true));
+
+                                  // actualizamos la info del provider con la lista de puntos, y las constraints asi como el tamaño de la imagen original
+                                  ref
+                                      .read(inpaintingImageNotifierProvider
+                                          .notifier)
+                                      .updateValue(InpaintingState(
+                                          keepPainted: keepPainted,
+                                          drawingPoints: drawingPoints,
+                                          constraints: boxConstraints,
+                                          width: snapshot.data!.width,
+                                          height: snapshot.data!.height));
+                                });
+                              },
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image:
+                                              NetworkImage(imageUrlSelected!),
+                                          fit: BoxFit.contain)),
+                                  child: CustomPaint(
+                                    painter: DrawingPainter(drawingPoints),
+                                    child: SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height,
+                                      width: MediaQuery.of(context).size.width,
+                                    ),
+                                  )),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(child: Text('Loading...')),
+                    CircularProgressIndicator()
+                  ],
+                );
+              }
+            });
   }
 
   _onConstraintsChanged(constraints) {
     // Recibe las BoxConstraints del widget hijo
     imageConstranints = constraints;
-  }
-
-  double _calculateProportion(double? availableHeight, double? availableWidth,
-      double height, double width) {
-// h/w = 1.5
-
-// h = 1.5 * w => 881 = 1.5 * w
-
-// w = h/1.5 => w = 881/1.5
-
-    var proportion = height / width;
-    if (availableHeight != null) {
-      //calcular la anchura
-      return availableHeight / proportion;
-    } else {
-      //calcular la altura
-      return availableWidth! * proportion;
-    }
   }
 
   List<Widget> _buildEditionTools(
@@ -195,7 +166,15 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
       ),
       const SizedBox(width: 5),
       ElevatedButton.icon(
-        onPressed: () => setState(() => drawingPoints = []),
+        onPressed: () => setState(() {
+          drawingPoints = [];
+          ref
+              .read(inpaintingImageNotifierProvider.notifier)
+              .updateValue(InpaintingState(
+                keepPainted: keepPainted,
+                drawingPoints: drawingPoints,
+              ));
+        }),
         icon: Icon(Icons.clear),
         label: Text("Clear Board"),
       ),
@@ -203,39 +182,37 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
       ElevatedButton.icon(
         onPressed: () => setState(() {
           drawingPoints = [];
-          ref
-              .read(inpaintingSelectedImageNotifierProvider.notifier)
-              .resetFilters();
+          ref.read(selectedImageNotifierProvider.notifier).resetAll();
+          ref.read(inpaintingImageNotifierProvider.notifier).reset();
         }),
-        icon: Icon(Icons.clear),
-        label: Text("Clear Image"),
+        icon: Icon(Icons.image_search_outlined),
+        label: Text("Change Image"),
       ),
-      const SizedBox(width: 5),
+      const Spacer(),
       Text(
-        "Change Painted",
+        "Keep Painted",
         style: TextStyle(color: Theme.of(context).hintColor),
       ),
       const SizedBox(width: 5),
       Switch(
         // This bool value toggles the switch.
-        value: usePaint,
+        value: keepPainted,
         onChanged: (bool value) {
           // This is called when the user toggles the switch.
           setState(() {
-            usePaint = value;
+            keepPainted = value;
+            ref
+                .read(inpaintingImageNotifierProvider.notifier)
+                .updateValue(InpaintingState(
+                  keepPainted: keepPainted,
+                ));
           });
         },
       ),
-      const Spacer(),
-      ElevatedButton.icon(
-        onPressed: () => drawingPoints.isEmpty
-            ? () {}
-            : _saveDrawing(height, width, constraints),
-        icon: const Icon(Icons.format_paint),
-        label: Text("Inpaint"),
-      ),
     ];
-    colors.forEach((color) => res.insert(0, _buildColorChose(color)));
+    for (var color in colors) {
+      res.insert(0, _buildColorChose(color));
+    }
     res.insert(1, SizedBox(width: 15));
     return res;
   }
@@ -256,57 +233,58 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
     );
   }
 
-  List<DrawingPoint> _scalePoints(
-      List<DrawingPoint> points, double scaleFactor, bool usePaint) {
-    return points.map((point) {
-      var res = DrawingPoint.copy(point);
-      res.offset = res.offset.scale(scaleFactor, scaleFactor);
-      if (usePaint) {
-        res.paint.color = Colors.white;
-      } else {
-        res.paint.color = Colors.black;
-      }
-      return res;
-    }).toList();
-  }
+//TODO remover esto
+  // List<DrawingPoint> _scalePoints(
+  //     List<DrawingPoint> points, double scaleFactor, bool keepPainted) {
+  //   return points.map((point) {
+  //     var res = DrawingPoint.copy(point);
+  //     res.offset = res.offset.scale(scaleFactor, scaleFactor);
+  //     if (keepPainted) {
+  //       res.paint.color = Colors.white;
+  //     } else {
+  //       res.paint.color = Colors.black;
+  //     }
+  //     return res;
+  //   }).toList();
+  // }
 
-  Future<void> _saveDrawing(
-      double height, double width, BoxConstraints? constraints) async {
-    isLoading = true;
-    try {
-      ui.PictureRecorder recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final Size size = Size(width, height);
-      List<DrawingPoint> points = _scalePoints(
-          List.of(drawingPoints), height / constraints!.maxHeight, true);
+  // Future<void> _saveDrawing(
+  //     double height, double width, BoxConstraints? constraints) async {
+  //   isLoading = true;
+  //   try {
+  //     ui.PictureRecorder recorder = ui.PictureRecorder();
+  //     final canvas = Canvas(recorder);
+  //     final Size size = Size(width, height);
+  //     List<DrawingPoint> points = _scalePoints(
+  //         List.of(drawingPoints), height / constraints!.maxHeight, true);
 
-      final paint = MaskPainter(points, true);
-      paint.paint(canvas, size);
+  //     final paint = MaskPainter(points, true);
+  //     paint.paint(canvas, size);
 
-      final picture = recorder.endRecording();
-      final mask = await picture.toImage(
-        size.width.toInt(),
-        size.height.toInt(),
-      );
+  //     final picture = recorder.endRecording();
+  //     final mask = await picture.toImage(
+  //       size.width.toInt(),
+  //       size.height.toInt(),
+  //     );
 
-      final byteData = await mask.toByteData(format: ui.ImageByteFormat.png);
-      final uint8List = byteData?.buffer.asUint8List();
+  //     final byteData = await mask.toByteData(format: ui.ImageByteFormat.png);
+  //     final uint8List = byteData?.buffer.asUint8List();
 
-      final String path = await supabase.storage.from('mask').uploadBinary(
-            'public/userid.png',
-            uint8List!,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-          );
+  //     final String path = await supabase.storage.from('mask').uploadBinary(
+  //           'public/userid.png',
+  //           uint8List!,
+  //           fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+  //         );
 
-      // final String url = await supabase.storage.from('bucket').getPublicUrl(
-      //     'public/userid.png',
-      //     transform: TransformOptions(width: 512, height: 768));
+  //     // final String url = await supabase.storage.from('bucket').getPublicUrl(
+  //     //     'public/userid.png',
+  //     //     transform: TransformOptions(width: 512, height: 768));
 
-      setState(() {
-        drawingPoints.clear();
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  //     setState(() {
+  //       drawingPoints.clear();
+  //     });
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 }
