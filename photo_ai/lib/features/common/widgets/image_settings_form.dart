@@ -2,8 +2,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_ai/features/auth/auth_provider.dart';
+import 'package:photo_ai/features/auth/utils/modal_utils.dart';
 import 'package:photo_ai/features/common/domain/inpainting_state.dart';
 import 'package:photo_ai/features/common/utils/error_utils.dart';
+import 'package:photo_ai/features/image_to_image/domain/entities/image_to_image_request.dart';
+import 'package:photo_ai/features/image_to_image/infraestructure/image_to_image_service.dart';
 import 'package:photo_ai/features/inpainting/domain/entities/drawing_point.dart';
 import 'package:photo_ai/features/inpainting/domain/entities/inpainting_request.dart';
 import 'package:photo_ai/features/inpainting/domain/entities/mask_painter.dart';
@@ -51,7 +55,8 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
 
   TextToImageRequest request = TextToImageRequest();
   TextToImageServiceImpl textToImageService = TextToImageServiceImpl();
-  InpaintingServiceImpl inpaintingServiceImpl = InpaintingServiceImpl();
+  ImageToImageServiceImpl imageToImageService = ImageToImageServiceImpl();
+  InpaintingServiceImpl inpaintingService = InpaintingServiceImpl();
 
   @override
   void initState() {
@@ -239,7 +244,11 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                         request.prompt = promptController.text;
                         request.negativePrompt += promptController.text;
 
-                        generateImage(context, ref, tab);
+                        if (ref.read(authNotifierProvider) == null) {
+                          showLoginDialog(context);
+                        } else {
+                          generateImage(context, ref, tab);
+                        }
                       }
                     },
               child: const Text('Generate'),
@@ -269,7 +278,29 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
 
         break;
       case 1:
-//TODO
+        var selectedUrl = ref.read(selectedImageNotifierProvider);
+
+        if (selectedUrl != null) {
+          ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+          imageToImageService
+              .imageToImage(ImageToImageRequest()
+                  .convertToImageToImageRequest(request, selectedUrl))
+              .then((value) {
+                ref
+                    .read(imageToImageNotifierProvider.notifier)
+                    .updateValue(value);
+                if (value.isEmpty) {
+                  showGenericError(context);
+                }
+              })
+              .catchError((onError) => showErrorCustom(context, "Error cr"))
+              .whenComplete(() => ref
+                  .read(spinnerNotifierProvider.notifier)
+                  .updateValue(false));
+        } else {
+          showErrorCustom(context, "select any photo to edit");
+        }
+
         break;
       case 2:
         //inpaint image
@@ -285,7 +316,7 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
             settings.drawingPoints!.isNotEmpty) {
           ref.read(spinnerNotifierProvider.notifier).updateValue(true);
 
-          ref.read(selectedImageNotifierProvider.notifier).resetAll();
+          ref.read(selectedImageNotifierProvider.notifier).reset();
 
           _saveDrawing(settings).then((maskUrl) {
             InpaintingRequest inpaintRequest = InpaintingRequest(
@@ -300,7 +331,7 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                 width: settings.width.toString(),
                 height: settings.height.toString(),
                 seed: request.seed);
-            inpaintingServiceImpl.inpaint(inpaintRequest).then((value) {
+            inpaintingService.inpaint(inpaintRequest).then((value) {
               ref
                   .read(inpaintingImageNotifierProvider.notifier)
                   .updateValue(InpaintingState(generatedImages: value));

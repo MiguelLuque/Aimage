@@ -143,7 +143,7 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Center(child: Text('Loading...')),
-                    CircularProgressIndicator()
+                    CircularProgressIndicator.adaptive()
                   ],
                 );
               }
@@ -182,7 +182,7 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
       ElevatedButton.icon(
         onPressed: () => setState(() {
           drawingPoints = [];
-          ref.read(selectedImageNotifierProvider.notifier).resetAll();
+          ref.read(selectedImageNotifierProvider.notifier).reset();
           ref.read(inpaintingImageNotifierProvider.notifier).reset();
         }),
         icon: Icon(Icons.image_search_outlined),

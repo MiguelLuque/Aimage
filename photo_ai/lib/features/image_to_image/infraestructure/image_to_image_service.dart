@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:photo_ai/features/text_to_image/domain/entities/text_to_image_request.dart';
+import 'package:photo_ai/features/image_to_image/domain/entities/image_to_image_request.dart';
 import 'package:photo_ai/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageToImageServiceImpl {
-  Future<List<String>> textToImage(TextToImageRequest request) async {
+  Future<List<String>> imageToImage(ImageToImageRequest request) async {
     try {
       List<String> res = List.empty();
       int count = 0;

@@ -1,20 +1,21 @@
+import 'package:photo_ai/features/text_to_image/domain/entities/text_to_image_request.dart';
+
 class ImageToImageRequest {
   String key;
   String modelId;
   String prompt;
   String negativePrompt;
+  String initImage;
   String width;
   String height;
   String samples;
   String safetyChecker;
-  String numInferenceSteps;
   String enhancePrompt;
-  String scheduler;
-  dynamic seed;
+  String numInferenceSteps;
   double guidanceScale;
+  String tomesd;
   dynamic webhook;
   dynamic trackId;
-  String tomesd;
   String multiLingual;
   String useKarrasSigmas;
   String upscale;
@@ -24,10 +25,13 @@ class ImageToImageRequest {
   dynamic loraStrength;
   dynamic embeddingsModel;
   int clipSkip;
+  String scheduler;
+  dynamic seed;
 
   ImageToImageRequest(
       {this.key = "your_api_key",
       this.modelId = "epicrealism-natural-sin-r",
+      this.initImage = "",
       this.prompt = "",
       this.negativePrompt =
           "deformed, distorted, disfigured, doll, poorly drawn, bad anatomy, wrong anatomy, nudity, nude, sex, porn,",
@@ -53,10 +57,42 @@ class ImageToImageRequest {
       this.clipSkip = 1,
       this.selfAttention = "yes"});
 
+  ImageToImageRequest convertToImageToImageRequest(
+      TextToImageRequest textRequest, String initImage) {
+    return ImageToImageRequest(
+      key: textRequest.key,
+      modelId: textRequest.modelId,
+      prompt: textRequest.prompt,
+      negativePrompt: textRequest.negativePrompt,
+      initImage:
+          initImage, // Provide the appropriate value or logic for initImage
+      width: textRequest.width,
+      height: textRequest.height,
+      samples: textRequest.samples,
+      safetyChecker: textRequest.safetyChecker,
+      enhancePrompt: textRequest.enhancePrompt,
+      numInferenceSteps: textRequest.numInferenceSteps,
+      guidanceScale: textRequest.guidanceScale,
+      tomesd: textRequest.tomesd,
+      webhook: textRequest.webhook,
+      trackId: textRequest.trackId,
+      multiLingual: textRequest.multiLingual,
+      useKarrasSigmas: textRequest.useKarrasSigmas,
+      upscale: textRequest.upscale,
+      vae: textRequest.vae,
+      selfAttention: textRequest.selfAttention,
+      loraModel: textRequest.loraModel,
+      loraStrength: textRequest.loraStrength,
+      embeddingsModel: textRequest.embeddingsModel,
+      clipSkip: textRequest.clipSkip,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'key': key,
       'model_id': modelId,
+      'init_image': initImage,
       'prompt': prompt,
       'negative_prompt': negativePrompt,
       'width': width,

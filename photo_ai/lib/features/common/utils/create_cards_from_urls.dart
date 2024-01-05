@@ -16,7 +16,7 @@ List<Widget> createCardsFromList(List<String> urls, context, Function f) {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // Muestra un indicador de carga mientras se obtiene la imagen.
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator.adaptive());
             } else if (snapshot.hasError) {
               // Maneja el error si ocurre.
               return const Icon(Icons.error);

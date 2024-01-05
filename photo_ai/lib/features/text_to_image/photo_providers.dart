@@ -71,7 +71,7 @@ class ImageToImageNotifier extends StateNotifier<List<String>> {
     state = value;
   }
 
-  void resetFilters() {
+  void reset() {
     state = List.empty();
   }
 }
@@ -146,7 +146,7 @@ class SelectedImageNotifier extends StateNotifier<String?> {
     state = value;
   }
 
-  void resetAll() {
+  void reset() {
     state = null;
   }
 }

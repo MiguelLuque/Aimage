@@ -45,11 +45,11 @@ class TextToImageRequest {
       this.tomesd = "yes",
       this.multiLingual = "no",
       this.useKarrasSigmas = "yes",
-      this.upscale = "no",
+      this.upscale = "2",
       this.vae,
       this.loraModel,
       this.loraStrength,
-      this.embeddingsModel,
+      this.embeddingsModel = "epicrealism-negative-embe",
       this.clipSkip = 1,
       this.selfAttention = "yes"});
 
