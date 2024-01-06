@@ -24,38 +24,40 @@ class ImageListScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(20.0),
         child: imageUrls.isEmpty
             ? const EmptyImageScreen()
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Text("Show all creations"),
-                        Switch(
-                          // This bool value toggles the switch.
-                          value: showAllImages,
-                          onChanged: (bool value) {
-                            // This is called when the user toggles the switch.
-                            ref
-                                .watch(appSettingsNotifierProvider.notifier)
-                                .updateValue(value);
-                          },
+            : Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text("Show all creations"),
+                      Switch(
+                        // This bool value toggles the switch.
+                        value: showAllImages,
+                        onChanged: (bool value) {
+                          // This is called when the user toggles the switch.
+                          ref
+                              .watch(appSettingsNotifierProvider.notifier)
+                              .updateValue(value);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: Wrap(
+                          spacing: 15.0, // Espaciado entre los widgets
+                          runSpacing:
+                              15.0, // Espaciado entre las filas de widgets
+                          children: createImagesFromList(imageUrls, context),
                         ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Center(
-                      child: Wrap(
-                        spacing: 15.0, // Espaciado entre los widgets
-                        runSpacing:
-                            15.0, // Espaciado entre las filas de widgets
-                        children: createImagesFromList(imageUrls, context),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ));
   }
 }

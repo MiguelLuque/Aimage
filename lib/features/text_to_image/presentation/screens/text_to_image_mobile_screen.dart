@@ -24,77 +24,74 @@ class TextToImageMobileScreen extends ConsumerWidget {
 
     return Padding(
         padding: const EdgeInsets.all(20.0),
-        child: imageUrls.isEmpty
-            ? const EmptyImageScreen()
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Images", style: TextStyle(fontSize: 20)),
-                          Row(
-                            children: [
-                              const Text(
-                                "All",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Switch(
-                                // This bool value toggles the switch.
-                                value: showAllImages,
-                                onChanged: (bool value) {
-                                  // This is called when the user toggles the switch.
-                                  ref
-                                      .watch(
-                                          appSettingsNotifierProvider.notifier)
-                                      .updateValue(value);
-                                },
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSecondary, // Color del borde
-                                    width: 2.0, // Ancho del borde
-                                  ),
-                                ),
-                                child: IconButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (context) => const Padding(
-                                                padding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 30,
-                                                        vertical: 10),
-                                                child: SettingsForm(
-                                                  isMobile: true,
-                                                ),
-                                              ));
-                                    },
-                                    icon: const FaIcon(
-                                      FontAwesomeIcons.sliders,
-                                    )),
-                              ),
-                            ],
-                          ),
-                        ],
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Images", style: TextStyle(fontSize: 20)),
+                  Row(
+                    children: [
+                      const Text(
+                        "All",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Center(
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Switch(
+                        // This bool value toggles the switch.
+                        value: showAllImages,
+                        onChanged: (bool value) {
+                          // This is called when the user toggles the switch.
+                          ref
+                              .watch(appSettingsNotifierProvider.notifier)
+                              .updateValue(value);
+                        },
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondary, // Color del borde
+                            width: 2.0, // Ancho del borde
+                          ),
+                        ),
+                        child: IconButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) => const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 30, vertical: 10),
+                                        child: SettingsForm(
+                                          isMobile: true,
+                                        ),
+                                      ));
+                            },
+                            icon: const FaIcon(
+                              FontAwesomeIcons.sliders,
+                            )),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            imageUrls.isEmpty
+                ? Expanded(child: const EmptyImageScreen())
+                : Expanded(
+                    child: SingleChildScrollView(
                       child: Wrap(
                         spacing: 10.0, // Espaciado entre los widgets
                         runSpacing:
@@ -103,8 +100,8 @@ class TextToImageMobileScreen extends ConsumerWidget {
                             createMobileImagesFromList(imageUrls, context),
                       ),
                     ),
-                  ],
-                ),
-              ));
+                  ),
+          ],
+        ));
   }
 }

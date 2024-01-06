@@ -401,8 +401,9 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
             fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
           );
 
-      final String url =
-          await supabase.storage.from('mask').getPublicUrl('public/userid.png');
+      final String url = await supabase.storage
+          .from('mask')
+          .getPublicUrl('$folderName/mask.png');
 
       return url;
 
