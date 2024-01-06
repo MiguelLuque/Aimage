@@ -60,9 +60,16 @@ class ImageLoaderCard extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Muestra un indicador de carga mientras se obtiene la imagen.
           return const Center(child: CircularProgressIndicator.adaptive());
-        } else if (snapshot.hasError) {
+        } else if (snapshot.hasError || snapshot.data == "") {
           // Maneja el error si ocurre.
-          return const Icon(Icons.error);
+          return Center(
+              child: Column(
+            children: [
+              Text("Error during generation"),
+              SizedBox(height: 5),
+              const Icon(Icons.error),
+            ],
+          ));
         } else {
           // Muestra la imagen si se ha cargado correctamente.
           return InkWell(
@@ -93,15 +100,22 @@ class ImageLoaderCard extends StatelessWidget {
   }
 }
 
-Future<void> waitForImage(String url) async {
+Future<String> waitForImage(String url) async {
   var response = await http.get(Uri.parse(url));
+  var counter = 0;
   if (response.statusCode != 200) {
     while (true) {
+      if (counter == 50) {
+        return "";
+      }
       await Future.delayed(const Duration(seconds: 5));
       response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         break;
+      } else {
+        counter++;
       }
     }
   }
+  return url;
 }

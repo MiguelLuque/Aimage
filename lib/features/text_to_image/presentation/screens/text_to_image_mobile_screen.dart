@@ -72,9 +72,14 @@ class TextToImageMobileScreen extends ConsumerWidget {
                                     onPressed: () {
                                       showModalBottomSheet(
                                           context: context,
-                                          builder: (context) =>
-                                              const SettingsForm(
-                                                isMobile: true,
+                                          builder: (context) => const Padding(
+                                                padding:
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 30,
+                                                        vertical: 10),
+                                                child: SettingsForm(
+                                                  isMobile: true,
+                                                ),
                                               ));
                                     },
                                     icon: const FaIcon(

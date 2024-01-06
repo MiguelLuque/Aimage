@@ -249,7 +249,7 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                   : () {
                       if (_formKey.currentState!.validate()) {
                         request.prompt = promptController.text;
-                        request.negativePrompt += promptController.text;
+                        request.negativePrompt += negativePromptController.text;
 
                         if (ref.read(authNotifierProvider) == null) {
                           showLoginDialog(context);
@@ -393,8 +393,10 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
       final byteData = await mask.toByteData(format: ui.ImageByteFormat.png);
       final uint8List = byteData?.buffer.asUint8List();
 
+      var folderName = supabase.auth.currentUser!.id;
+
       await supabase.storage.from('mask').uploadBinary(
-            'public/userid.png',
+            '$folderName/mask.png',
             uint8List!,
             fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
           );
