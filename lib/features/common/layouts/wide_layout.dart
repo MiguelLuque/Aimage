@@ -39,7 +39,9 @@ class WideLayoutState extends ConsumerState<WideLayout>
     bool isLoading = ref.watch(spinnerNotifierProvider);
     return Row(
       children: [
-        const ImageSettingsForm(),
+        const ImageSettingsForm(
+          isMobile: false,
+        ),
         Expanded(
           flex: 3,
           child: Column(

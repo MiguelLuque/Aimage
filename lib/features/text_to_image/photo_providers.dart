@@ -47,7 +47,11 @@ final textToImageNotifierProvider =
 );
 
 class TextToImageNotifier extends StateNotifier<List<String>> {
-  TextToImageNotifier() : super([]);
+  TextToImageNotifier()
+      : super([
+          "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/0-4013990b-25af-45f9-acba-28b44185be9e.png",
+          "https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/0-4013990b-25af-45f9-acba-28b44185be9e.png"
+        ]);
 
   void updateValue(List<String> value) {
     state = value;

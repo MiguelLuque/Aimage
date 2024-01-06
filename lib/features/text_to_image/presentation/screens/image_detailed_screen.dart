@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:aimage/features/common/widgets/image_card.dart';
 
 class ImageDetailedScreen extends StatelessWidget {
   final String imageUrl;
@@ -9,7 +8,19 @@ class ImageDetailedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ImageCard(imageUrl: imageUrl, proportion: 0.5),
+      body: Center(
+        child: Container(
+          height: (MediaQuery.of(context).size.height * 0.8),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              image: DecorationImage(
+                fit: BoxFit.contain,
+                image: NetworkImage(
+                  imageUrl,
+                ),
+              )),
+        ),
+      ),
       appBar: AppBar(),
     );
   }

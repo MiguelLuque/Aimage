@@ -1,8 +1,9 @@
+import 'package:aimage/config/menu/menu_items.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/config/theme/theme.dart';
 import 'package:aimage/features/auth/auth_provider.dart';
-import 'package:aimage/features/auth/utils/modal_utils.dart';
+import 'package:aimage/features/auth/utils/auth_modal_utils.dart';
 import 'package:aimage/features/common/layouts/narrow_layout.dart';
 import 'package:aimage/features/common/layouts/wide_layout.dart';
 import 'package:aimage/features/text_to_image/photo_providers.dart';
@@ -46,8 +47,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class HomeScreenState extends ConsumerState<HomeScreen> {
+  List<MenuItem> menuItems = [];
+
   @override
   void initState() {
+    menuItems = appMenuItems;
     _setupAuthListener();
     super.initState();
   }
@@ -85,9 +89,16 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      ref.read(featureNotifierProvider.notifier).updateValue(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text('AImage'),
@@ -114,12 +125,24 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
           ],
         ),
-        body: LayoutBuilder(builder: (context, constraints) {
-          if (constraints.maxWidth > 600) {
-            return const WideLayout();
-          } else {
-            return const NarrowLayout();
-          }
-        }));
+        body: constraints.maxWidth > 600
+            ? const WideLayout()
+            : const NarrowLayout(),
+        bottomNavigationBar: constraints.maxWidth < 600
+            ? BottomNavigationBar(
+                items: menuItems
+                    .map(
+                      (item) => BottomNavigationBarItem(
+                        icon: Icon(item.icon),
+                        label: item.title,
+                      ),
+                    )
+                    .toList(),
+                currentIndex: ref.read(featureNotifierProvider),
+                onTap: _onItemTapped,
+              )
+            : null,
+      );
+    });
   }
 }

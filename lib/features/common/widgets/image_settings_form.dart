@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/auth/auth_provider.dart';
-import 'package:aimage/features/auth/utils/modal_utils.dart';
+import 'package:aimage/features/auth/utils/auth_modal_utils.dart';
 import 'package:aimage/features/common/domain/inpainting_state.dart';
 import 'package:aimage/features/common/utils/error_utils.dart';
 import 'package:aimage/features/image_to_image/domain/entities/image_to_image_request.dart';
@@ -19,18 +19,21 @@ import 'package:aimage/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageSettingsForm extends StatelessWidget {
-  const ImageSettingsForm({
-    super.key,
-  });
+  const ImageSettingsForm({super.key, required this.isMobile});
+
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
+    return Expanded(
       child: Padding(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            Expanded(child: SettingsForm()),
+            Expanded(
+                child: SettingsForm(
+              isMobile: isMobile,
+            )),
           ],
         ),
       ),
@@ -39,7 +42,9 @@ class ImageSettingsForm extends StatelessWidget {
 }
 
 class SettingsForm extends ConsumerStatefulWidget {
-  const SettingsForm({super.key});
+  const SettingsForm({super.key, required this.isMobile});
+
+  final bool isMobile;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => SettingsFormState();
@@ -68,13 +73,15 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
     var tab = ref.watch(featureNotifierProvider);
     bool isLoading = ref.watch(spinnerNotifierProvider);
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(
-          color: Colors.grey,
-          width: 0.5,
-        ),
-      ),
+      decoration: widget.isMobile
+          ? null
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                color: Colors.grey,
+                width: 0.5,
+              ),
+            ),
       child: Column(
         children: [
           Expanded(
