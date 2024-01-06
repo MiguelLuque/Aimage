@@ -1,3 +1,4 @@
+import 'package:aimage/features/common/utils/create_images_from_urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -46,17 +47,4 @@ List<Widget> createCardsFromList(List<String> urls, context, Function f) {
     );
   }
   return widgets;
-}
-
-Future<void> waitForImage(String url) async {
-  var response = await http.get(Uri.parse(url));
-  if (response.statusCode != 200) {
-    while (true) {
-      await Future.delayed(const Duration(seconds: 5));
-      response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        break;
-      }
-    }
-  }
 }
