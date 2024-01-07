@@ -1,4 +1,4 @@
-import 'package:aimage/features/common/utils/create_images_from_urls.dart';
+import 'package:aimage/features/common/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;

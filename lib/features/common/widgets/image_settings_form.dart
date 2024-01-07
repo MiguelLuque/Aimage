@@ -255,6 +255,9 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                           showLoginDialog(context);
                         } else {
                           generateImage(context, ref, tab);
+                          if (widget.isMobile) {
+                            Navigator.of(context).pop();
+                          }
                         }
                       }
                     },
@@ -266,7 +269,8 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
     );
   }
 
-  void generateImage(BuildContext context, WidgetRef ref, int tab) {
+  Future<void> generateImage(
+      BuildContext context, WidgetRef ref, int tab) async {
     switch (tab) {
       case 0:
         //text to image
@@ -279,7 +283,8 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                 showGenericError(context);
               }
             })
-            .catchError((onError) => showErrorCustom(context, "Error cr"))
+            .catchError(
+                (onError) => showErrorCustom(context, "Error creating image"))
             .whenComplete(() =>
                 ref.read(spinnerNotifierProvider.notifier).updateValue(false));
 

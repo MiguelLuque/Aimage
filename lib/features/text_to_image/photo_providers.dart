@@ -6,12 +6,13 @@ import 'package:aimage/features/text_to_image/domain/entities/text_to_image_requ
 
 //texto to image controller
 final settingsFormNotifierProvider =
-    StateNotifierProvider<TextToImageFormNotifier, TextToImageRequest>(
-  (ref) => TextToImageFormNotifier(),
+    NotifierProvider<TextToImageFormNotifier, TextToImageRequest>(
+  TextToImageFormNotifier.new,
 );
 
-class TextToImageFormNotifier extends StateNotifier<TextToImageRequest> {
-  TextToImageFormNotifier() : super(TextToImageRequest());
+class TextToImageFormNotifier extends Notifier<TextToImageRequest> {
+  @override
+  TextToImageRequest build() => TextToImageRequest();
 
   void updateValue(TextToImageRequest value) {
     state = value;
@@ -23,13 +24,14 @@ class TextToImageFormNotifier extends StateNotifier<TextToImageRequest> {
 }
 
 //Feature controller
-final featureNotifierProvider = StateNotifierProvider<FeatureNotifier, int>(
-  (ref) => FeatureNotifier(),
+final featureNotifierProvider = NotifierProvider<FeatureNotifier, int>(
+  FeatureNotifier.new,
 );
 
 // Controller o Notifier
-class FeatureNotifier extends StateNotifier<int> {
-  FeatureNotifier() : super(0);
+class FeatureNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
   void updateValue(int value) {
     state = value;
@@ -42,12 +44,13 @@ class FeatureNotifier extends StateNotifier<int> {
 
 //Text to image generated list controller
 final textToImageNotifierProvider =
-    StateNotifierProvider<TextToImageNotifier, List<String>>(
-  (ref) => TextToImageNotifier(),
+    NotifierProvider<TextToImageNotifier, List<String>>(
+  TextToImageNotifier.new,
 );
 
-class TextToImageNotifier extends StateNotifier<List<String>> {
-  TextToImageNotifier() : super([]);
+class TextToImageNotifier extends Notifier<List<String>> {
+  @override
+  List<String> build() => [];
 
   void updateValue(List<String> value) {
     state = value;
@@ -60,12 +63,13 @@ class TextToImageNotifier extends StateNotifier<List<String>> {
 
 //Text to image generated list controller
 final imageToImageNotifierProvider =
-    StateNotifierProvider<ImageToImageNotifier, List<String>>(
-  (ref) => ImageToImageNotifier(),
+    NotifierProvider<ImageToImageNotifier, List<String>>(
+  ImageToImageNotifier.new,
 );
 
-class ImageToImageNotifier extends StateNotifier<List<String>> {
-  ImageToImageNotifier() : super([]);
+class ImageToImageNotifier extends Notifier<List<String>> {
+  @override
+  List<String> build() => [];
 
   void updateValue(List<String> value) {
     state = value;
@@ -77,12 +81,13 @@ class ImageToImageNotifier extends StateNotifier<List<String>> {
 }
 
 //Control if there is any process and the app must show a spinner
-final spinnerNotifierProvider = StateNotifierProvider<SpinnerNotifier, bool>(
-  (ref) => SpinnerNotifier(),
+final spinnerNotifierProvider = NotifierProvider<SpinnerNotifier, bool>(
+  SpinnerNotifier.new,
 );
 
-class SpinnerNotifier extends StateNotifier<bool> {
-  SpinnerNotifier() : super(false);
+class SpinnerNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   void updateValue(bool value) {
     state = value;
@@ -94,13 +99,13 @@ class SpinnerNotifier extends StateNotifier<bool> {
 }
 
 //Control app settings and preferences
-final appSettingsNotifierProvider =
-    StateNotifierProvider<AppSettingsNotifier, bool>(
-  (ref) => AppSettingsNotifier(),
+final appSettingsNotifierProvider = NotifierProvider<AppSettingsNotifier, bool>(
+  AppSettingsNotifier.new,
 );
 
-class AppSettingsNotifier extends StateNotifier<bool> {
-  AppSettingsNotifier() : super(false);
+class AppSettingsNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   void updateValue(bool value) {
     state = value;
@@ -113,12 +118,13 @@ class AppSettingsNotifier extends StateNotifier<bool> {
 
 //Inpainting generated list controller
 final inpaintingImageNotifierProvider =
-    StateNotifierProvider<InpaintingImageNotifier, InpaintingState>(
-  (ref) => InpaintingImageNotifier(),
+    NotifierProvider<InpaintingImageNotifier, InpaintingState>(
+  InpaintingImageNotifier.new,
 );
 
-class InpaintingImageNotifier extends StateNotifier<InpaintingState> {
-  InpaintingImageNotifier() : super(InpaintingState());
+class InpaintingImageNotifier extends Notifier<InpaintingState> {
+  @override
+  InpaintingState build() => InpaintingState();
 
   void updateValue(InpaintingState value) {
     state = state.copyWith(value);
@@ -131,12 +137,13 @@ class InpaintingImageNotifier extends StateNotifier<InpaintingState> {
 
 //Selected image controller
 final selectedImageNotifierProvider =
-    StateNotifierProvider<SelectedImageNotifier, String?>(
-  (ref) => SelectedImageNotifier(),
+    NotifierProvider<SelectedImageNotifier, String?>(
+  SelectedImageNotifier.new,
 );
 
-class SelectedImageNotifier extends StateNotifier<String?> {
-  SelectedImageNotifier() : super(null);
+class SelectedImageNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
 
   void updateSelectedImage(String? value) {
     state = value;
