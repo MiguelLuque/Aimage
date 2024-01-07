@@ -3,7 +3,7 @@ import 'package:aimage/features/text_to_image/domain/entities/text_to_image_requ
 import 'package:aimage/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class TextToImageServiceImpl {
+class TextToImageRepository {
   Future<List<String>> textToImage(TextToImageRequest request) async {
     try {
       List<String> res = List.empty();

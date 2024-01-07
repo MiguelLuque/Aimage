@@ -5,15 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/auth/auth_provider.dart';
 import 'package:aimage/features/auth/utils/auth_modal_utils.dart';
 import 'package:aimage/features/common/domain/inpainting_state.dart';
-import 'package:aimage/features/common/utils/error_utils.dart';
-import 'package:aimage/features/image_to_image/domain/entities/image_to_image_request.dart';
-import 'package:aimage/features/image_to_image/infraestructure/image_to_image_service.dart';
 import 'package:aimage/features/inpainting/domain/entities/drawing_point.dart';
-import 'package:aimage/features/inpainting/domain/entities/inpainting_request.dart';
 import 'package:aimage/features/inpainting/domain/entities/mask_painter.dart';
-import 'package:aimage/features/inpainting/infraestructure/inpainting_service.dart';
 import 'package:aimage/features/text_to_image/domain/entities/text_to_image_request.dart';
-import 'package:aimage/features/text_to_image/infraestructure/text_to_image_service.dart';
 import 'package:aimage/features/text_to_image/photo_providers.dart';
 import 'package:aimage/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -59,9 +53,6 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
   var strength = 0.7;
 
   TextToImageRequest request = TextToImageRequest();
-  TextToImageServiceImpl textToImageService = TextToImageServiceImpl();
-  ImageToImageServiceImpl imageToImageService = ImageToImageServiceImpl();
-  InpaintingServiceImpl inpaintingService = InpaintingServiceImpl();
 
   @override
   void initState() {
@@ -254,7 +245,9 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                         if (ref.read(authNotifierProvider) == null) {
                           showLoginDialog(context);
                         } else {
-                          generateImage(context, ref, tab);
+                          ref
+                              .read(featureNotifierProvider.notifier)
+                              .generateImage(context, request, strength);
                           if (widget.isMobile) {
                             Navigator.of(context).pop();
                           }
@@ -269,100 +262,101 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
     );
   }
 
-  Future<void> generateImage(
-      BuildContext context, WidgetRef ref, int tab) async {
-    switch (tab) {
-      case 0:
-        //text to image
-        ref.read(spinnerNotifierProvider.notifier).updateValue(true);
-        textToImageService
-            .textToImage(request)
-            .then((value) {
-              ref.read(textToImageNotifierProvider.notifier).updateValue(value);
-              if (value.isEmpty) {
-                showGenericError(context);
-              }
-            })
-            .catchError(
-                (onError) => showErrorCustom(context, "Error creating image"))
-            .whenComplete(() =>
-                ref.read(spinnerNotifierProvider.notifier).updateValue(false));
+//TODO: remove this
+  // Future<void> generateImage(
+  //     BuildContext context, WidgetRef ref, int tab) async {
+  //   switch (tab) {
+  //     case 0:
+  //       //text to image
+  //       ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+  //       textToImageService
+  //           .textToImage(request)
+  //           .then((value) {
+  //             ref.read(textToImageNotifierProvider.notifier).updateValue(value);
+  //             if (value.isEmpty) {
+  //               showGenericError(context);
+  //             }
+  //           })
+  //           .catchError(
+  //               (onError) => showErrorCustom(context, "Error creating image"))
+  //           .whenComplete(() =>
+  //               ref.read(spinnerNotifierProvider.notifier).updateValue(false));
 
-        break;
-      case 1:
-        var selectedUrl = ref.read(selectedImageNotifierProvider);
+  //       break;
+  //     case 1:
+  //       var selectedUrl = ref.read(selectedImageNotifierProvider);
 
-        if (selectedUrl != null) {
-          ref.read(spinnerNotifierProvider.notifier).updateValue(true);
-          imageToImageService
-              .imageToImage(ImageToImageRequest()
-                  .convertToImageToImageRequest(request, selectedUrl))
-              .then((value) {
-                ref
-                    .read(imageToImageNotifierProvider.notifier)
-                    .updateValue(value);
-                if (value.isEmpty) {
-                  showGenericError(context);
-                }
-              })
-              .catchError((onError) => showErrorCustom(context, "Error cr"))
-              .whenComplete(() => ref
-                  .read(spinnerNotifierProvider.notifier)
-                  .updateValue(false));
-        } else {
-          showErrorCustom(context, "select any photo to edit");
-        }
+  //       if (selectedUrl != null) {
+  //         ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+  //         imageToImageService
+  //             .imageToImage(ImageToImageRequest()
+  //                 .convertToImageToImageRequest(request, selectedUrl))
+  //             .then((value) {
+  //               ref
+  //                   .read(imageToImageNotifierProvider.notifier)
+  //                   .updateValue(value);
+  //               if (value.isEmpty) {
+  //                 showGenericError(context);
+  //               }
+  //             })
+  //             .catchError((onError) => showErrorCustom(context, "Error cr"))
+  //             .whenComplete(() => ref
+  //                 .read(spinnerNotifierProvider.notifier)
+  //                 .updateValue(false));
+  //       } else {
+  //         showErrorCustom(context, "select any photo to edit");
+  //       }
 
-        break;
-      case 2:
-        //inpaint image
-        var settings = ref.read(inpaintingImageNotifierProvider);
-        var selectedUrl = ref.read(selectedImageNotifierProvider);
+  //       break;
+  //     case 2:
+  //       //inpaint image
+  //       var settings = ref.read(inpaintingImageNotifierProvider);
+  //       var selectedUrl = ref.read(selectedImageNotifierProvider);
 
-        if (selectedUrl == null) {
-          showErrorCustom(context, "Select and draw a mask");
-          break;
-        }
+  //       if (selectedUrl == null) {
+  //         showErrorCustom(context, "Select and draw a mask");
+  //         break;
+  //       }
 
-        if (settings.drawingPoints != null &&
-            settings.drawingPoints!.isNotEmpty) {
-          ref.read(spinnerNotifierProvider.notifier).updateValue(true);
+  //       if (settings.drawingPoints != null &&
+  //           settings.drawingPoints!.isNotEmpty) {
+  //         ref.read(spinnerNotifierProvider.notifier).updateValue(true);
 
-          ref.read(selectedImageNotifierProvider.notifier).reset();
+  //         ref.read(selectedImageNotifierProvider.notifier).reset();
 
-          _saveDrawing(settings).then((maskUrl) {
-            InpaintingRequest inpaintRequest = InpaintingRequest(
-                initImage: selectedUrl,
-                maskImage: maskUrl,
-                prompt: request.prompt,
-                negativePrompt: request.negativePrompt,
-                samples: request.samples,
-                steps: request.numInferenceSteps,
-                strength: strength,
-                guidanceScale: request.guidanceScale,
-                width: settings.width.toString(),
-                height: settings.height.toString(),
-                seed: request.seed);
-            inpaintingService.inpaint(inpaintRequest).then((value) {
-              ref
-                  .read(inpaintingImageNotifierProvider.notifier)
-                  .updateValue(InpaintingState(generatedImages: value));
+  //         _saveDrawing(settings).then((maskUrl) {
+  //           InpaintingRequest inpaintRequest = InpaintingRequest(
+  //               initImage: selectedUrl,
+  //               maskImage: maskUrl,
+  //               prompt: request.prompt,
+  //               negativePrompt: request.negativePrompt,
+  //               samples: request.samples,
+  //               steps: request.numInferenceSteps,
+  //               strength: strength,
+  //               guidanceScale: request.guidanceScale,
+  //               width: settings.width.toString(),
+  //               height: settings.height.toString(),
+  //               seed: request.seed);
+  //           inpaintingService.inpaint(inpaintRequest).then((value) {
+  //             ref
+  //                 .read(inpaintingImageNotifierProvider.notifier)
+  //                 .updateValue(InpaintingState(generatedImages: value));
 
-              if (value.isEmpty) {
-                showGenericError(context);
-              }
-            });
-          }).catchError((error) {
-            showErrorCustom(context, error.message);
-          }).whenComplete(() =>
-              ref.read(spinnerNotifierProvider.notifier).updateValue(false));
-        } else {
-          showErrorCustom(context, "It is necessary to draw a mask");
-        }
+  //             if (value.isEmpty) {
+  //               showGenericError(context);
+  //             }
+  //           });
+  //         }).catchError((error) {
+  //           showErrorCustom(context, error.message);
+  //         }).whenComplete(() =>
+  //             ref.read(spinnerNotifierProvider.notifier).updateValue(false));
+  //       } else {
+  //         showErrorCustom(context, "It is necessary to draw a mask");
+  //       }
 
-        break;
-    }
-  }
+  //       break;
+  //   }
+  // }
 
   List<DrawingPoint> _scalePoints(
       List<DrawingPoint> points, double scaleFactor, bool keepPainted) {

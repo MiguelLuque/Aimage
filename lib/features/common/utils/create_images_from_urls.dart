@@ -105,7 +105,7 @@ Future<String> waitForImage(String url) async {
   var counter = 0;
   if (response.statusCode != 200) {
     while (true) {
-      if (counter == 50) {
+      if (counter == 30) {
         return "";
       }
       await Future.delayed(const Duration(seconds: 5));

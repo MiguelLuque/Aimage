@@ -1,6 +1,5 @@
-import 'package:aimage/features/common/utils/image_utils.dart';
+import 'package:aimage/features/common/utils/create_images_from_urls.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 List<Widget> createCardsFromList(List<String> urls, context, Function f) {
   // Crear una lista de widgets basada en la lista de strings

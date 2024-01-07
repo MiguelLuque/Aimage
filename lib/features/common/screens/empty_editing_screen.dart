@@ -1,7 +1,6 @@
-import 'package:aimage/features/common/utils/image_utils.dart';
+import 'package:aimage/features/common/utils/create_images_from_urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:aimage/features/common/screens/empty_image_screen.dart';
 import 'package:aimage/features/text_to_image/photo_providers.dart';
 
@@ -146,6 +145,4 @@ class _EmptyEditingScreenState extends ConsumerState<EmptyEditingScreen> {
     ));
     return widgets;
   }
-
-
 }

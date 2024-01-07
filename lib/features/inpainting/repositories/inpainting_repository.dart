@@ -3,7 +3,7 @@ import 'package:aimage/features/inpainting/domain/entities/inpainting_request.da
 import 'package:aimage/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class InpaintingServiceImpl {
+class InpaintingRepository {
   Future<List<String>> inpaint(InpaintingRequest request) async {
     try {
       List<String> res = List.empty();

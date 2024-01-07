@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/common/domain/inpainting_state.dart';
-import 'package:aimage/features/inpainting/application/utils/inpainting_utils.dart';
+import 'package:aimage/features/inpainting/utils/inpainting_utils.dart';
 import 'package:aimage/features/inpainting/domain/entities/drawing_point.dart';
 import 'package:aimage/features/common/screens/empty_editing_screen.dart';
 import 'package:aimage/features/text_to_image/photo_providers.dart';
