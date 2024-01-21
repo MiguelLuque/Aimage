@@ -1,3 +1,4 @@
+import 'package:aimage/config/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/common/widgets/loading_widget.dart';
@@ -44,34 +45,55 @@ class WideLayoutState extends ConsumerState<WideLayout>
         ),
         Expanded(
           flex: 3,
-          child: Column(
-            children: [
-              TabBar(
-                  controller: tabController,
-                  tabs: [
-                    for (final element in elements)
-                      Tab(
-                        text: element,
-                      ),
-                  ],
-                  onTap: (value) => ref
-                      .read(featureNotifierProvider.notifier)
-                      .updateValue(value)),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    LoadingWidget(
-                        isLoading: isLoading, child: const ImageListScreen()),
-                    LoadingWidget(
-                        isLoading: isLoading,
-                        child: const ImageToImageScreen()),
-                    LoadingWidget(
-                        isLoading: isLoading, child: const InpaintingScreen()),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 5, 10, 5),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TabBar(
+                      controller: tabController,
+                      tabs: [
+                        for (final element in elements)
+                          Tab(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                  border: Border.all(
+                                      color: AppTheme().white, width: 1)),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text(element),
+                              ),
+                            ),
+                          ),
+                      ],
+                      onTap: (value) => ref
+                          .read(featureNotifierProvider.notifier)
+                          .updateValue(value)),
                 ),
-              )
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: TabBarView(
+                      controller: tabController,
+                      children: [
+                        LoadingWidget(
+                            isLoading: isLoading,
+                            child: const ImageListScreen()),
+                        LoadingWidget(
+                            isLoading: isLoading,
+                            child: const ImageToImageScreen()),
+                        LoadingWidget(
+                            isLoading: isLoading,
+                            child: const InpaintingScreen()),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         )
       ],

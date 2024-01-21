@@ -37,7 +37,7 @@ class ImageToImageRequest {
           "deformed, distorted, disfigured, doll, poorly drawn, bad anatomy, wrong anatomy, nudity, nude, sex, porn,",
       this.width = "512",
       this.height = "768",
-      this.samples = "4",
+      this.samples = "1",
       this.safetyChecker = "no",
       this.numInferenceSteps = "20",
       this.enhancePrompt = "no",

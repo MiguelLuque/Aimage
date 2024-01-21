@@ -97,7 +97,7 @@ class TextToImageMobileScreen extends ConsumerWidget {
               height: 20,
             ),
             imageUrls.isEmpty
-                ? Expanded(child: const EmptyImageScreen())
+                ? const Expanded(child: EmptyImageScreen())
                 : Expanded(
                     child: SingleChildScrollView(
                       child: Wrap(

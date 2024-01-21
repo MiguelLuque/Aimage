@@ -1,5 +1,7 @@
 import 'dart:ui' as ui;
 
+import 'package:aimage/config/theme/theme.dart';
+import 'package:aimage/features/common/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/auth/auth_provider.dart';
@@ -69,7 +71,7 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
           : BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
               border: Border.all(
-                color: Colors.grey,
+                color: AppTheme().white,
                 width: 0.5,
               ),
             ),
@@ -234,7 +236,8 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
           const Divider(),
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 14),
-            child: ElevatedButton(
+            child: GradientButton(
+              width: 250,
               onPressed: isLoading
                   ? null
                   : () {
@@ -254,7 +257,10 @@ class SettingsFormState extends ConsumerState<SettingsForm> {
                         }
                       }
                     },
-              child: const Text('Generate'),
+              child: Text(
+                'Generate',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
           ),
         ],

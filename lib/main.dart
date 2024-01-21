@@ -1,4 +1,5 @@
 import 'package:aimage/config/menu/menu_items.dart';
+import 'package:aimage/features/common/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/config/theme/theme.dart';
@@ -100,7 +101,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text('AImage'),
           actions: [
             ref.read(authNotifierProvider) != null
@@ -116,8 +117,11 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                   )
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      child: const Text("Login"),
+                    child: GradientButton(
+                      child: Text(
+                        'Login',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       onPressed: () {
                         showLoginDialog(context);
                       },

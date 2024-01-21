@@ -1,4 +1,4 @@
-import 'package:aimage/features/common/utils/create_images_from_urls.dart';
+import 'package:aimage/features/common/widgets/image_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/text_to_image/photo_providers.dart';
@@ -20,44 +20,33 @@ class ImageListScreen extends ConsumerWidget {
           .addAll(ref.watch(inpaintingImageNotifierProvider).generatedImages!);
     }
 
-    return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: imageUrls.isEmpty
-            ? const EmptyImageScreen()
-            : Column(
+    return imageUrls.isEmpty
+        ? const EmptyImageScreen()
+        : Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Text("Show all creations"),
-                      Switch(
-                        // This bool value toggles the switch.
-                        value: showAllImages,
-                        onChanged: (bool value) {
-                          // This is called when the user toggles the switch.
-                          ref
-                              .watch(appSettingsNotifierProvider.notifier)
-                              .updateValue(value);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Center(
-                        child: Wrap(
-                          spacing: 15.0, // Espaciado entre los widgets
-                          runSpacing:
-                              15.0, // Espaciado entre las filas de widgets
-                          children: createImagesFromList(imageUrls, context),
-                        ),
-                      ),
-                    ),
+                  const Text("Show all creations"),
+                  Switch(
+                    // This bool value toggles the switch.
+                    value: showAllImages,
+                    onChanged: (bool value) {
+                      // This is called when the user toggles the switch.
+                      ref
+                          .watch(appSettingsNotifierProvider.notifier)
+                          .updateValue(value);
+                    },
                   ),
                 ],
-              ));
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Expanded(
+                child: ImageCardList(imageUrls: imageUrls),
+              ),
+            ],
+          );
   }
 }

@@ -10,11 +10,11 @@ List<Widget> createImagesFromList(List<String> urls, context) {
     widgets.add(
       // Puedes personalizar el widget según tus necesidades
       SizedBox(
-        width: (MediaQuery.of(context).size.height * 0.55) / 1.5,
+        width: (MediaQuery.of(context).size.height * 0.55),
         height: (MediaQuery.of(context).size.height * 0.55),
         child: ImageLoaderCard(
           url: url,
-          boxFit: BoxFit.cover,
+          boxFit: BoxFit.contain,
         ),
       ),
     );
@@ -30,8 +30,8 @@ List<Widget> createMobileImagesFromList(List<String> urls, context) {
     widgets.add(
       // Puedes personalizar el widget según tus necesidades
       SizedBox(
-        width: (MediaQuery.of(context).size.height * 0.18),
-        height: (MediaQuery.of(context).size.height * 0.18),
+        width: (MediaQuery.of(context).size.width * 0.9),
+        height: (MediaQuery.of(context).size.width * 0.9),
         child: ImageLoaderCard(
           url: url,
           boxFit: BoxFit.contain,
@@ -62,12 +62,12 @@ class ImageLoaderCard extends StatelessWidget {
           return const Center(child: CircularProgressIndicator.adaptive());
         } else if (snapshot.hasError || snapshot.data == "") {
           // Maneja el error si ocurre.
-          return Center(
+          return const Center(
               child: Column(
             children: [
               Text("Error during generation"),
               SizedBox(height: 5),
-              const Icon(Icons.error),
+              Icon(Icons.error),
             ],
           ));
         } else {

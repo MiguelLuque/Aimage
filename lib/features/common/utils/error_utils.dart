@@ -1,3 +1,4 @@
+import 'package:aimage/config/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 SnackBar showSnackBarLoginError(BuildContext context) {
@@ -47,7 +48,7 @@ showGenericError(BuildContext context) {
 
 SnackBar showSnackBarCustomMessage(BuildContext context, String message) {
   return SnackBar(
-    backgroundColor: Colors.deepPurple.shade100,
+    backgroundColor: AppTheme().error,
     content: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

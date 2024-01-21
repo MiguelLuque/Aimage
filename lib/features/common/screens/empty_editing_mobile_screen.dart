@@ -1,4 +1,5 @@
 import 'package:aimage/features/common/utils/create_images_from_urls.dart';
+import 'package:aimage/features/common/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aimage/features/common/screens/empty_image_screen.dart';
@@ -98,7 +99,7 @@ class _EmptyEditingScreenState extends ConsumerState<EmptyEditingScreen> {
                               borderRadius: BorderRadius.circular(8.0),
                               side: BorderSide(
                                 color: selectedImage == i
-                                    ? Colors.deepPurple
+                                    ? Colors.white
                                     : Colors.transparent,
                                 width: 2.0,
                               ),
@@ -135,7 +136,7 @@ class _EmptyEditingScreenState extends ConsumerState<EmptyEditingScreen> {
                   })));
     }
     widgets.add(Center(
-      child: ElevatedButton(
+      child: GradientButton(
           onPressed: selectedImage == null
               ? null
               : () => ref

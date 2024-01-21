@@ -37,7 +37,7 @@ class InpaintingRequest {
       required this.maskImage,
       this.width = "512",
       this.height = "768",
-      this.samples = "4",
+      this.samples = "1",
       this.safetyChecker = "no",
       this.steps = "20",
       this.enhancePrompt = "no",

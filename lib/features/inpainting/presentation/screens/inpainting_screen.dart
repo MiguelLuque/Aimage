@@ -43,7 +43,10 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
                     children: [
-                      Row(
+                      Wrap(
+                        runSpacing: 40,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        //alignment: WrapAlignment.spaceEvenly,
                         children: _buildEditionTools(snapshot.data!.height,
                             snapshot.data!.width, imageConstranints),
                       ),
@@ -54,7 +57,7 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
                               snapshot.data!.width / snapshot.data!.height,
                           child:
                               LayoutBuilder(builder: (context, boxConstraints) {
-                                //TODO arreglar los puntos cuando se cambia de tamaño
+                            //TODO arreglar los puntos cuando se cambia de tamaño
                             // if (imageConstranints != null &&
                             //     drawingPoints.isNotEmpty) {
                             //   drawingPoints = _scalePoints(
@@ -159,13 +162,6 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
   List<Widget> _buildEditionTools(
       double height, double width, BoxConstraints? constraints) {
     List<Widget> res = [
-      Slider(
-        min: 20,
-        max: 60,
-        value: strokeWidth,
-        onChanged: (val) => setState(() => strokeWidth = val),
-      ),
-      const SizedBox(width: 5),
       ElevatedButton.icon(
         onPressed: () => setState(() {
           drawingPoints = [];
@@ -189,7 +185,20 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
         icon: const Icon(Icons.image_search_outlined),
         label: const Text("Change Image"),
       ),
-      const Spacer(),
+      const SizedBox(
+        width: 60,
+      ),
+      SizedBox(
+        width: 200.0,
+        height: 50.0,
+        child: Slider(
+          min: 20,
+          max: 60,
+          value: strokeWidth,
+          onChanged: (val) => setState(() => strokeWidth = val),
+        ),
+      ),
+      const SizedBox(width: 70),
       Text(
         "Keep Painted",
         style: TextStyle(color: Theme.of(context).hintColor),
@@ -212,9 +221,9 @@ class InpaintingScreenState extends ConsumerState<InpaintingScreen> {
       ),
     ];
     for (var color in colors) {
-      res.insert(0, _buildColorChose(color));
+      res.insert(4, _buildColorChose(color));
     }
-    res.insert(1, const SizedBox(width: 15));
+    res.insert(5, const SizedBox(width: 15));
     return res;
   }
 

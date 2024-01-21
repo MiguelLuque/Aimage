@@ -14,7 +14,10 @@ class NarrowLayout extends ConsumerWidget {
     var tab = ref.watch(featureNotifierProvider);
     bool isLoading = ref.watch(spinnerNotifierProvider);
     return SafeArea(
-      child: loadFeature(tab, isLoading),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: loadFeature(tab, isLoading),
+      ),
     );
   }
 

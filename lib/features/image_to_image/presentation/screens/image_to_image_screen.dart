@@ -7,7 +7,6 @@ class ImageToImageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Padding(
-        padding: EdgeInsets.all(20.0), child: EmptyEditingScreen());
+    return const EmptyEditingScreen();
   }
 }

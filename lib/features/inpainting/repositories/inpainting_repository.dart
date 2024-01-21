@@ -48,6 +48,7 @@ class InpaintingRepository {
           break;
         default:
           //TODO: mostrar un error y devolver una lista vacia
+          print(response.toString());
           break;
       }
       return res;
